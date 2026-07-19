@@ -79,7 +79,8 @@
             
             // This picks the compliment based on the day. If the day is bigger than your list, 
             // it loops back to the beginning seamlessly.
-            const index = dayOfYear % compliments.length;
+            // By subtracting 200, today becomes "Day 0" (the very top of your list)
+const index = (dayOfYear - 200) % compliments.length;
             return compliments[index];
         }
 
