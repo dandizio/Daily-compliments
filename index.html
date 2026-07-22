@@ -5,93 +5,370 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>For Gabby ❤️</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             margin: 0;
-            padding: 0;
-            height: 100vh;
+            padding: 20px 15px;
+            min-height: 100vh;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            gap: 20px;
             background: linear-gradient(135deg, #ffe3e3 0%, #ffd1d1 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             text-align: center;
         }
+
+        /* Compliment Card */
         .card {
             background: white;
-            padding: 40px;
+            padding: 30px 20px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            max-width: 80%;
+            width: 100%;
+            max-width: 380px;
         }
         h1 {
             color: #ff4a6b;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+            font-size: 2rem;
+            margin: 10px 0;
         }
-        p {
+        p#daily-compliment {
             color: #4a4a4a;
-            font-size: 1.5rem;
-            font-weight: 500;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 10px 0 0 0;
         }
         .heart {
             color: #ff4a6b;
-            font-size: 2rem;
-            animation: beat .3s infinite alternate;
+            font-size: 2.2rem;
+            display: inline-block;
+            animation: beat .4s infinite alternate ease-in-out;
         }
         @keyframes beat {
-            to { transform: scale(1.1); }
+            to { transform: scale(1.15); }
+        }
+
+        /* Trivia Card */
+        .trivia-card {
+            background: #ffffff;
+            padding: 25px 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            width: 100%;
+            max-width: 380px;
+            display: none; /* Controlled by JS */
+        }
+        .trivia-card h2 {
+            margin: 0 0 10px 0;
+            color: #ff4a6b;
+            font-size: 1.4rem;
+        }
+        #trivia-question {
+            color: #4a4a4a;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        .options-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .option-btn {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #ffe3e3;
+            border-radius: 12px;
+            background: #fff5f5;
+            color: #333;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .option-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.85;
+        }
+        .feedback-text {
+            margin-top: 15px;
+            margin-bottom: 0;
+            font-weight: 700;
+            font-size: 1.05rem;
         }
     </style>
 </head>
 <body>
 
+    <!-- Compliment Section -->
     <div class="card">
         <div class="heart">❤️</div>
         <h1>Danny loves your...</h1>
         <p id="daily-compliment">Loading...</p>
     </div>
 
+    <!-- Trivia Section (Placed directly below) -->
+    <div class="trivia-card">
+        <h2>Daily Trivia 🧠</h2>
+        <p id="trivia-question">Loading today's question...</p>
+        <div id="trivia-options" class="options-group"></div>
+        <p id="trivia-feedback" class="feedback-text"></p>
+    </div>
+
+    <div class="card">
+        <h2>We've Been Together For...</h2>
+        <h1 id="days-count" style="color: #ff4a6b; font-size: 2.5rem; margin: 10px 0;">0</h1>
+        <p>and counting! ❤️</p>
+    </div>
+
     <script>
-        // 1. Put your list of compliments here! Add as many as you want.
+        // 1. Compliments List
         const compliments = [
             "Beautiful Blue Eyes",
             "Gorgeous Smile",
             "Contagious Laugh",
             "Kind Heart",
             "Sense of Humor",
+            "Nightly FaceTime Calls",
+            "Ability to Make Me a Better Man",
             "Amazing Style",
+            "Goofy Moments",
+            "Compliments",
             "Determination",
+            "Positive Energy",
+            "Perfect Body",
             "Warm Hugs",
+            "Way of Showing Love",
             "Athleticism",
+            "Jewelry",
+            "Soft Hair",
+            "Positive Energy",
             "Smarts",
             "Kindness",
+            "Competitiveness",
+            "Desire to Have Fun",
             "Kisses",
-            "Compliments",
-            "Ability to Care",
-            "Listening Skills",
             "Hilarious Jokes",
+            "Back Scratches",
             "Work Ethic",
-            "Cuddles",
+            "Mirror Pics",
+            "Mom Skills",
+            "Brownies",
+            "Ability to Care",
+            "Neck Kisses",
+            "Listening Skills",
+            "Head Scratches",
+            "Sexual Teasing",
+            "TikTok's"
         ];
 
-        // 2. This code automatically picks a new compliment based on the current day
         function getDailyCompliment() {
+            const startComplimentNumber = 1; 
+
+            const baseDate = new Date(2026, 6, 19); 
             const now = new Date();
-            // This calculates which day of the year it is (1 to 365)
-            const start = new Date(now.getFullYear(), 0, 0);
-            const diff = now - start;
-            const oneDay = 1000 * 60 * 60 * 24;
-            const dayOfYear = Math.floor(diff / oneDay);
             
-            // This picks the compliment based on the day. If the day is bigger than your list, 
-            // it loops back to the beginning seamlessly.
-            // By subtracting 200, today becomes "Day 0" (the very top of your list)
-const index = (dayOfYear - 200) % compliments.length;
-            return compliments[index];
+            baseDate.setHours(0, 0, 0, 0);
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+            const diffTime = today - baseDate;
+            const daysPassed = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            const startingIndex = startComplimentNumber - 1;
+            const index = (startingIndex + daysPassed) % compliments.length;
+            
+            const safeIndex = (index + compliments.length) % compliments.length;
+
+            return compliments[safeIndex];
         }
 
-        // 3. Put it on the screen
-        document.getElementById('daily-compliment').innerText = getDailyCompliment();
+        document.addEventListener("DOMContentLoaded", () => {
+            const complimentEl = document.getElementById('daily-compliment');
+            if (complimentEl) {
+                complimentEl.innerText = getDailyCompliment();
+            }
+        });
+
+        // 2. Trivia Schedule Map ("YYYY-MM-DD")
+        const triviaSchedule = {
+            "2026-08-11": {
+                question: "How many full months have we been dating",
+                options: ["7", "8", "9"],
+                correct: 1,
+                successMsg: "Correct! It feels like 8 years at this point. Write this number down to help figure out the surprise.",
+                failMsg: "Nope! We've been dating for 8 months dummy. Write this number down to help figure out the surprise."
+            },
+            "2026-08-12": {
+                question: "How many Eagles games have I been to at the Linc?",
+                options: ["22", "24", "26"],
+                correct: 0,
+                successMsg: "Spot on! IDK how you got that. Write this number down right underneath yesterday's number.",
+                failMsg: "Nice try, there's no way of you knowing that. Write it down again."
+            },
+            "2026-08-13": {
+                question: "What number does Saquon Barkley wear?",
+                options: ["25", "26", "28"],
+                correct: 1,
+                successMsg: "Correct! BALL KNOWLEDGE. Write it down.",
+                failMsg: "Nope! I'm kinda disappointed but it's ok, I still love you. Write it down."
+            },
+            "2026-08-14": {
+                question: "What is my favorite warm sweet treat? (not the cold one)",
+                options: ["Brownies", "Cookies", "Ice Cream"],
+                correct: 0,
+                successMsg: "Correct! You know I love my brownies. Write that down and then go make me some please.",
+                failMsg: "Nope! You can't be serious. Write down the REAL answer please. I deserve extra brownies just because of that."
+            },
+            "2026-08-15": {
+                question: "What position does Saquon Barkley play?",
+                options: ["Quarterback", "Wide Receiver", "Runningback"],
+                correct: 2,
+                successMsg: "Correct! ",
+                failMsg: "Looks like you misclicked. Write down the CORRECT answer."
+            },
+            "2026-08-16": {
+                question: "I work at Subaru Park. What is the name of the Philadelphia soccer team that plays there?",
+                options: ["Red Wings", "Union", "Founding Fathers"],
+                correct: 1,
+                successMsg: "Correct! Good work queen. Do you have any guesses for the surprise yet?",
+                failMsg: "Nope! What is wrong with you? Write the CORRECT answer down please."
+            },
+            "2026-08-17": {
+                question: "What's my middle name?",
+                options: ["Joseph", "Nicholas", "Joshua"],
+                correct: 1,
+                successMsg: "Easy peasy lemon squeezy. Pencil -> Paper.",
+                failMsg: "ISTG DO NOT GET THIS WRONG. Write it down bro."
+            },
+            "2026-08-18": {
+                question: "Where was our very first date?",
+                options: ["The Coffee Shop", "The Boardwalk", "The Ice Cream Parlor"],
+                correct: 0,
+                successMsg: "Correct! Best date ever. ❤️",
+                failMsg: "Nope! How could you forget?! 😂"
+            },
+            "2026-08-19": {
+                question: "Where was our very first date?",
+                options: ["The Coffee Shop", "The Boardwalk", "The Ice Cream Parlor"],
+                correct: 0,
+                successMsg: "Correct! Best date ever. ❤️",
+                failMsg: "Nope! How could you forget?! 😂"
+            },
+            "2026-08-20": {
+                question: "Where was our very first date?",
+                options: ["The Coffee Shop", "The Boardwalk", "The Ice Cream Parlor"],
+                correct: 0,
+                successMsg: "Correct! Best date ever. ❤️",
+                failMsg: "Nope! How could you forget?! 😂"
+            }
+        };
+
+        function getTodayString() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function loadDailyTrivia() {
+            const todayStr = getTodayString();
+            const todayData = triviaSchedule[todayStr];
+            const cardEl = document.querySelector(".trivia-card");
+
+            if (!cardEl) return;
+
+            if (!todayData) {
+                cardEl.style.display = "none";
+                return;
+            }
+
+            cardEl.style.display = "block";
+            
+            const questionEl = document.getElementById("trivia-question");
+            const optionsContainer = document.getElementById("trivia-options");
+            const feedbackEl = document.getElementById("trivia-feedback");
+
+            optionsContainer.innerHTML = "";
+            feedbackEl.innerText = "";
+            questionEl.innerText = todayData.question;
+
+            const todayKey = `trivia_answered_${todayStr}`;
+            const previousAnswer = localStorage.getItem(todayKey);
+
+            todayData.options.forEach((optionText, index) => {
+                const btn = document.createElement("button");
+                btn.className = "option-btn";
+                btn.innerText = optionText;
+
+                if (previousAnswer !== null) {
+                    btn.disabled = true;
+                    if (parseInt(previousAnswer) === todayData.correct && index === todayData.correct) {
+                        btn.style.backgroundColor = "#d1fae5";
+                        btn.style.borderColor = "#a7f3d0";
+                    }
+                }
+
+                btn.addEventListener("click", () => {
+                    localStorage.setItem(todayKey, index);
+                    
+                    const allBtns = optionsContainer.querySelectorAll(".option-btn");
+                    allBtns.forEach(b => b.disabled = true);
+
+                    if (index === todayData.correct) {
+                        btn.style.backgroundColor = "#d1fae5";
+                        btn.style.borderColor = "#a7f3d0";
+                        feedbackEl.innerText = todayData.successMsg;
+                        feedbackEl.style.color = "#059669";
+                    } else {
+                        btn.style.backgroundColor = "#fee2e2";
+                        btn.style.borderColor = "#fca5a5";
+                        feedbackEl.innerText = todayData.failMsg;
+                        feedbackEl.style.color = "#dc2626";
+                    }
+                });
+
+                optionsContainer.appendChild(btn);
+            });
+
+            if (previousAnswer !== null) {
+                const isCorrect = parseInt(previousAnswer) === todayData.correct;
+                feedbackEl.innerText = isCorrect ? todayData.successMsg : todayData.failMsg;
+                feedbackEl.style.color = isCorrect ? "#059669" : "#dc2626";
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadDailyTrivia);
+
+        // 3. Days Together Counter (November 26, 2025)
+        function calculateDays() {
+            // Precise date string parsing to match exact day counts across timezones
+            const startDate = new Date("2025-11-26T00:00:00"); 
+            const today = new Date();
+            
+            startDate.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+
+            const diffTime = today.getTime() - startDate.getTime();
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+            const daysEl = document.getElementById("days-count");
+            if (daysEl) {
+                // Formats as "239 days"
+                daysEl.innerText = `${diffDays} days`;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", calculateDays);
     </script>
 </body>
 </html>
