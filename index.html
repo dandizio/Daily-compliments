@@ -22,7 +22,7 @@
             text-align: center;
         }
 
-        /* Compliment Card */
+        /* Generic Card Styling */
         .card {
             background: white;
             padding: 30px 20px;
@@ -52,8 +52,8 @@
             to { transform: scale(1.15); }
         }
 
-        /* Trivia Card */
-        .trivia-card {
+        /* Question & Trivia Cards */
+        .question-card {
             background: #ffffff;
             padding: 25px 20px;
             border-radius: 20px;
@@ -62,12 +62,12 @@
             max-width: 380px;
             display: none; /* Controlled by JS */
         }
-        .trivia-card h2 {
+        .question-card h2 {
             margin: 0 0 10px 0;
             color: #ff4a6b;
             font-size: 1.4rem;
         }
-        #trivia-question {
+        .card-prompt {
             color: #4a4a4a;
             font-size: 1.1rem;
             font-weight: 600;
@@ -79,6 +79,8 @@
             flex-direction: column;
             gap: 12px;
         }
+
+        /* Multiple Choice Buttons */
         .option-btn {
             width: 100%;
             padding: 14px 16px;
@@ -99,6 +101,38 @@
             cursor: not-allowed;
             opacity: 0.85;
         }
+        
+        /* Text Input Styling for Open-Ended Questions */
+        .open-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ffe3e3;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        .open-input:focus {
+            border-color: #ff4a6b;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            background: #ff4a6b;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s ease;
+        }
+        .submit-btn:active {
+            background: #e03e5c;
+        }
+
         .feedback-text {
             margin-top: 15px;
             margin-bottom: 0;
@@ -109,29 +143,40 @@
 </head>
 <body>
 
-    <!-- Compliment Section -->
+    <!-- 1. Compliment Section -->
     <div class="card">
         <div class="heart">❤️</div>
         <h1>Danny loves your...</h1>
         <p id="daily-compliment">Loading...</p>
     </div>
 
-    <!-- Trivia Section (Placed directly below) -->
-    <div class="trivia-card">
+    <!-- 2. Days Together Section (Moved up!) -->
+    <div class="card">
+        <h2>We've Been Together For ❤️</h2>
+        <h1 id="days-count" style="color: #ff4a6b; font-size: 2.5rem; margin: 10px 0;">0</h1>
+        <p>and counting!</p>
+    </div>
+
+    <!-- 3. Question of the Day Section (Open Ended) -->
+    <div id="qotd-card" class="question-card">
+        <h2>Question of the Day 🧠</h2>
+        <p id="qotd-prompt" class="card-prompt">Loading question...</p>
+        <div id="qotd-container"></div>
+        <p id="qotd-feedback" class="feedback-text"></p>
+    </div>
+
+    <!-- 4. Daily Trivia Section (Multiple Choice) -->
+    <div id="trivia-card" class="question-card">
         <h2>Daily Trivia 🧠</h2>
-        <p id="trivia-question">Loading today's question...</p>
-        <div id="trivia-options" class="options-group"></div>
+        <p id="trivia-prompt" class="card-prompt">Loading trivia...</p>
+        <div id="trivia-container" class="options-group"></div>
         <p id="trivia-feedback" class="feedback-text"></p>
     </div>
 
-    <div class="card">
-        <h2>We've Been Together For...</h2>
-        <h1 id="days-count" style="color: #ff4a6b; font-size: 2.5rem; margin: 10px 0;">0</h1>
-        <p>and counting! ❤️</p>
-    </div>
-
     <script>
-        // 1. Compliments List
+        // -------------------------------------------------------------
+        // 1. COMPLIMENTS LIST
+        // -------------------------------------------------------------
         const compliments = [
             "Beautiful Blue Eyes",
             "Gorgeous Smile",
@@ -159,6 +204,7 @@
             "Kisses",
             "Hilarious Jokes",
             "Back Scratches",
+				"Freckles",
             "Work Ethic",
             "Mirror Pics",
             "Mom Skills",
@@ -191,14 +237,23 @@
             return compliments[safeIndex];
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const complimentEl = document.getElementById('daily-compliment');
-            if (complimentEl) {
-                complimentEl.innerText = getDailyCompliment();
+        // -------------------------------------------------------------
+        // 2. SCHEDULE MAPS
+        // -------------------------------------------------------------
+        
+        // Open-ended questions -> Question of the Day
+        const qotdSchedule = {
+            "2026-07-24": {
+                question: "What's one thing that you like about me/something that I do that you've NEVER told me?",
+                responseMsg: ""
+            },
+            "2026-09-11": {
+                question: "If we could hop on a plane anywhere tomorrow, where are we going?",
+                responseMsg: ""
             }
-        });
+        };
 
-        // 2. Trivia Schedule Map ("YYYY-MM-DD")
+        // Multiple choice questions -> Daily Trivia
         const triviaSchedule = {
             "2026-08-11": {
                 question: "How many full months have we been dating",
@@ -250,20 +305,34 @@
                 failMsg: "ISTG DO NOT GET THIS WRONG. Write it down bro."
             },
             "2026-08-18": {
+                question: "What number did I wear for football in 8th grade?",
+                options: ["0", "5", "10"],
+                correct: 0,
+                successMsg: "Correct! Not sure if I ever told you that but good job. Write it down.",
+                failMsg: "Nope! It's ok I don't ever think I told you before. It was 0. Write it down."
+            },
+				"2026-08-19": {
+                question: "Before Saquon Barkley, my favorite player was another Eagles runningback who wore #26, what was his name?",
+                options: ["Kenny Gainwell", "D'Andre Swift", "Miles Sanders"],
+                correct: 2,
+                successMsg: "Correct! That's some good ball knowledge right there.",
+                failMsg: "Nope! You almost had it. Miles Sanders was my favorite."
+            },
+				"2026-08-20": {
                 question: "Where was our very first date?",
                 options: ["The Coffee Shop", "The Boardwalk", "The Ice Cream Parlor"],
                 correct: 0,
                 successMsg: "Correct! Best date ever. ❤️",
                 failMsg: "Nope! How could you forget?! 😂"
             },
-            "2026-08-19": {
+				"2026-08-21": {
                 question: "Where was our very first date?",
                 options: ["The Coffee Shop", "The Boardwalk", "The Ice Cream Parlor"],
                 correct: 0,
                 successMsg: "Correct! Best date ever. ❤️",
                 failMsg: "Nope! How could you forget?! 😂"
             },
-            "2026-08-20": {
+				"2026-08-22": {
                 question: "Where was our very first date?",
                 options: ["The Coffee Shop", "The Boardwalk", "The Ice Cream Parlor"],
                 correct: 0,
@@ -280,78 +349,145 @@
             return `${year}-${month}-${day}`;
         }
 
-        function loadDailyTrivia() {
+        // -------------------------------------------------------------
+        // 3. LOAD QUESTION OF THE DAY (OPEN ENDED)
+        // -------------------------------------------------------------
+        function loadQuestionOfTheDay() {
             const todayStr = getTodayString();
-            const todayData = triviaSchedule[todayStr];
-            const cardEl = document.querySelector(".trivia-card");
+            const data = qotdSchedule[todayStr];
+            const cardEl = document.getElementById("qotd-card");
 
-            if (!cardEl) return;
-
-            if (!todayData) {
+            if (!data) {
                 cardEl.style.display = "none";
                 return;
             }
 
             cardEl.style.display = "block";
-            
-            const questionEl = document.getElementById("trivia-question");
-            const optionsContainer = document.getElementById("trivia-options");
+
+            const promptEl = document.getElementById("qotd-prompt");
+            const containerEl = document.getElementById("qotd-container");
+            const feedbackEl = document.getElementById("qotd-feedback");
+
+            containerEl.innerHTML = "";
+            feedbackEl.innerText = "";
+            promptEl.innerText = data.question;
+
+            const storageKey = `qotd_answered_${todayStr}`;
+            const previousAnswer = localStorage.getItem(storageKey);
+
+            if (previousAnswer !== null) {
+                feedbackEl.innerText = data.responseMsg;
+                feedbackEl.style.color = "#059669";
+            } else {
+                const inputEl = document.createElement("input");
+                inputEl.type = "text";
+                inputEl.className = "open-input";
+                inputEl.placeholder = "Type your answer here...";
+
+                const submitBtn = document.createElement("button");
+                submitBtn.className = "submit-btn";
+                submitBtn.innerText = "Submit ❤️";
+
+                submitBtn.addEventListener("click", () => {
+                    const val = inputEl.value.trim();
+                    if (!val) return;
+
+                    // 1. Save locally on her phone
+                    localStorage.setItem(storageKey, val);
+                    containerEl.innerHTML = "";
+                    feedbackEl.innerText = data.responseMsg;
+                    feedbackEl.style.color = "#059669";
+
+                    // Secret background send straight to your Google Sheet!
+fetch("https://script.google.com/macros/s/AKfycbzPLUrJCR6y4o35qNNI63tCYNG8sA17f5G3XvXk8WRKUikqE8FEebpa8ag2nHVbgGg9Jw/exec", {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({
+        date: todayStr,
+        question: data.question,
+        answer: val
+    })
+}).catch(err => console.log("Done"));
+
+                });
+
+                containerEl.appendChild(inputEl);
+                containerEl.appendChild(submitBtn);
+            }
+        }
+
+        // -------------------------------------------------------------
+        // 4. LOAD DAILY TRIVIA (MULTIPLE CHOICE)
+        // -------------------------------------------------------------
+        function loadDailyTrivia() {
+            const todayStr = getTodayString();
+            const data = triviaSchedule[todayStr];
+            const cardEl = document.getElementById("trivia-card");
+
+            if (!data) {
+                cardEl.style.display = "none";
+                return;
+            }
+
+            cardEl.style.display = "block";
+
+            const promptEl = document.getElementById("trivia-prompt");
+            const containerEl = document.getElementById("trivia-container");
             const feedbackEl = document.getElementById("trivia-feedback");
 
-            optionsContainer.innerHTML = "";
+            containerEl.innerHTML = "";
             feedbackEl.innerText = "";
-            questionEl.innerText = todayData.question;
+            promptEl.innerText = data.question;
 
-            const todayKey = `trivia_answered_${todayStr}`;
-            const previousAnswer = localStorage.getItem(todayKey);
+            const storageKey = `trivia_answered_${todayStr}`;
+            const previousAnswer = localStorage.getItem(storageKey);
 
-            todayData.options.forEach((optionText, index) => {
+            data.options.forEach((optionText, index) => {
                 const btn = document.createElement("button");
                 btn.className = "option-btn";
                 btn.innerText = optionText;
 
                 if (previousAnswer !== null) {
                     btn.disabled = true;
-                    if (parseInt(previousAnswer) === todayData.correct && index === todayData.correct) {
+                    if (parseInt(previousAnswer) === data.correct && index === data.correct) {
                         btn.style.backgroundColor = "#d1fae5";
                         btn.style.borderColor = "#a7f3d0";
                     }
                 }
 
                 btn.addEventListener("click", () => {
-                    localStorage.setItem(todayKey, index);
+                    localStorage.setItem(storageKey, index);
                     
-                    const allBtns = optionsContainer.querySelectorAll(".option-btn");
+                    const allBtns = containerEl.querySelectorAll(".option-btn");
                     allBtns.forEach(b => b.disabled = true);
 
-                    if (index === todayData.correct) {
+                    if (index === data.correct) {
                         btn.style.backgroundColor = "#d1fae5";
                         btn.style.borderColor = "#a7f3d0";
-                        feedbackEl.innerText = todayData.successMsg;
+                        feedbackEl.innerText = data.successMsg;
                         feedbackEl.style.color = "#059669";
                     } else {
                         btn.style.backgroundColor = "#fee2e2";
                         btn.style.borderColor = "#fca5a5";
-                        feedbackEl.innerText = todayData.failMsg;
+                        feedbackEl.innerText = data.failMsg;
                         feedbackEl.style.color = "#dc2626";
                     }
                 });
 
-                optionsContainer.appendChild(btn);
+                containerEl.appendChild(btn);
             });
 
             if (previousAnswer !== null) {
-                const isCorrect = parseInt(previousAnswer) === todayData.correct;
-                feedbackEl.innerText = isCorrect ? todayData.successMsg : todayData.failMsg;
+                const isCorrect = parseInt(previousAnswer) === data.correct;
+                feedbackEl.innerText = isCorrect ? data.successMsg : data.failMsg;
                 feedbackEl.style.color = isCorrect ? "#059669" : "#dc2626";
             }
         }
 
-        document.addEventListener("DOMContentLoaded", loadDailyTrivia);
-
-        // 3. Days Together Counter (November 26, 2025)
+        // -------------------------------------------------------------
+        // 5. DAYS TOGETHER COUNTER
+        // -------------------------------------------------------------
         function calculateDays() {
-            // Precise date string parsing to match exact day counts across timezones
             const startDate = new Date("2025-11-26T00:00:00"); 
             const today = new Date();
             
@@ -363,12 +499,33 @@
 
             const daysEl = document.getElementById("days-count");
             if (daysEl) {
-                // Formats as "239 days"
                 daysEl.innerText = `${diffDays} days`;
             }
         }
 
-        document.addEventListener("DOMContentLoaded", calculateDays);
+        // -------------------------------------------------------------
+        // INITIALIZE ALL CARDS ON PAGE LOAD
+        // -------------------------------------------------------------
+        document.addEventListener("DOMContentLoaded", () => {
+            const complimentEl = document.getElementById('daily-compliment');
+            if (complimentEl) {
+                complimentEl.innerText = getDailyCompliment();
+            }
+            calculateDays();
+            loadQuestionOfTheDay();
+            loadDailyTrivia();
+				
+				// Silent ping whenever she opens the site
+window.addEventListener("DOMContentLoaded", () => {
+    fetch("https://webhook.site/7c03235c-f425-4393-bcc4-02a73e38b45c", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            event: "Gabby opened the site!"
+        })
+    }).catch(err => console.log("Logged"));
+});
+        });
     </script>
 </body>
 </html>
