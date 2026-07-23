@@ -150,7 +150,7 @@
         <p id="daily-compliment">Loading...</p>
     </div>
 
-    <!-- 2. Days Together Section (Moved up!) -->
+    <!-- 2. Days Together Section -->
     <div class="card">
         <h2>We've Been Together For ❤️</h2>
         <h1 id="days-count" style="color: #ff4a6b; font-size: 2.5rem; margin: 10px 0;">0</h1>
@@ -204,7 +204,7 @@
             "Kisses",
             "Hilarious Jokes",
             "Back Scratches",
-				"Freckles",
+            "Freckles",
             "Work Ethic",
             "Mirror Pics",
             "Mom Skills",
@@ -311,28 +311,28 @@
                 successMsg: "Correct! Not sure if I ever told you that but good job. Write it down.",
                 failMsg: "Nope! It's ok I don't ever think I told you before. It was 0. Write it down."
             },
-				"2026-08-19": {
+            "2026-08-19": {
                 question: "Before Saquon Barkley, my favorite player was another Eagles runningback who wore #26, what was his name?",
                 options: ["Kenny Gainwell", "D'Andre Swift", "Miles Sanders"],
                 correct: 2,
                 successMsg: "Correct! That's some good ball knowledge right there.",
                 failMsg: "Nope! You almost had it. Miles Sanders was my favorite."
             },
-				"2026-08-20": {
+            "2026-08-20": {
                 question: "Where was our very first date?",
                 options: ["The Coffee Shop", "The Boardwalk", "The Ice Cream Parlor"],
                 correct: 0,
                 successMsg: "Correct! Best date ever. ❤️",
                 failMsg: "Nope! How could you forget?! 😂"
             },
-				"2026-08-21": {
+            "2026-08-21": {
                 question: "Where was our very first date?",
                 options: ["The Coffee Shop", "The Boardwalk", "The Ice Cream Parlor"],
                 correct: 0,
                 successMsg: "Correct! Best date ever. ❤️",
                 failMsg: "Nope! How could you forget?! 😂"
             },
-				"2026-08-22": {
+            "2026-08-22": {
                 question: "Where was our very first date?",
                 options: ["The Coffee Shop", "The Boardwalk", "The Ice Cream Parlor"],
                 correct: 0,
@@ -392,23 +392,22 @@
                     const val = inputEl.value.trim();
                     if (!val) return;
 
-                    // 1. Save locally on her phone
+                    // Save locally on her phone
                     localStorage.setItem(storageKey, val);
                     containerEl.innerHTML = "";
                     feedbackEl.innerText = data.responseMsg;
                     feedbackEl.style.color = "#059669";
 
                     // Secret background send straight to your Google Sheet!
-fetch("https://script.google.com/macros/s/AKfycbzPLUrJCR6y4o35qNNI63tCYNG8sA17f5G3XvXk8WRKUikqE8FEebpa8ag2nHVbgGg9Jw/exec", {
-    method: "POST",
-    headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify({
-        date: todayStr,
-        question: data.question,
-        answer: val
-    })
-}).catch(err => console.log("Done"));
-
+                    fetch("https://script.google.com/macros/s/AKfycbzPLUrJCR6y4o35qNNI63tCYNG8sA17f5G3XvXk8WRKUikqE8FEebpa8ag2nHVbgGg9Jw/exec", {
+                        method: "POST",
+                        headers: { "Content-Type": "text/plain" },
+                        body: JSON.stringify({
+                            date: todayStr,
+                            question: data.question,
+                            answer: val
+                        })
+                    }).catch(err => console.log("Done"));
                 });
 
                 containerEl.appendChild(inputEl);
@@ -488,7 +487,8 @@ fetch("https://script.google.com/macros/s/AKfycbzPLUrJCR6y4o35qNNI63tCYNG8sA17f5
         // 5. DAYS TOGETHER COUNTER
         // -------------------------------------------------------------
         function calculateDays() {
-            const startDate = new Date("2025-11-26T00:00:00"); 
+            // November 26, 2025 (Month 10 is Nov in JS)
+            const startDate = new Date(2025, 10, 26); 
             const today = new Date();
             
             startDate.setHours(0, 0, 0, 0);
@@ -504,54 +504,66 @@ fetch("https://script.google.com/macros/s/AKfycbzPLUrJCR6y4o35qNNI63tCYNG8sA17f5
         }
 
         // -------------------------------------------------------------
-        // INITIALIZE ALL CARDS ON PAGE LOAD
+        // INITIALIZE ALL CARDS & TRACKER ON PAGE LOAD
         // -------------------------------------------------------------
         document.addEventListener("DOMContentLoaded", () => {
+            // 1. Render Daily Compliment
             const complimentEl = document.getElementById('daily-compliment');
             if (complimentEl) {
                 complimentEl.innerText = getDailyCompliment();
             }
+
+            // 2. Render Days Counter & Cards
             calculateDays();
             loadQuestionOfTheDay();
             loadDailyTrivia();
-				
-				// 🔍 DETAILED VIEW TRACKER
-document.addEventListener("DOMContentLoaded", async () => {
-    // 1. Basic details (Orientation & Screen)
-    const viewData = {
-        event: "Gabby opened the site!",
-        screenResolution: `${window.screen.width}x${window.screen.height}`,
-        orientation: screen.orientation ? screen.orientation.type : (window.innerWidth > window.innerHeight ? "landscape" : "portrait"),
-        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        networkType: "Unknown",
-        batteryLevel: "Unknown",
-        isCharging: "Unknown"
-    };
 
-    // 2. Check Network Connection Type (if browser supports Network Information API)
-    if (navigator.connection || navigator.mozConnection || navigator.webkitConnection) {
-        const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-        viewData.networkType = conn.effectiveType || conn.type || "Unknown"; // e.g., '4g', 'wifi'
-    }
+            // 3. Pipedream View Tracker
+            const viewData = {
+                event: "Gabby opened the site!",
+                screenResolution: `${window.screen.width}x${window.screen.height}`,
+                orientation: (window.innerWidth > window.innerHeight) ? "landscape" : "portrait",
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                networkType: "Unknown",
+                batteryLevel: "Unknown",
+                isCharging: "Unknown"
+            };
 
-    // 3. Check Battery Status (if browser supports Battery Status API)
-    if (navigator.getBattery) {
-        try {
-            const battery = await navigator.getBattery();
-            viewData.batteryLevel = `${Math.round(battery.level * 100)}%`;
-            viewData.isCharging = battery.charging ? "Yes" : "No";
-        } catch (e) {
-            console.log("Battery API restricted");
-        }
-    }
+            try {
+                const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                if (conn && conn.effectiveType) {
+                    viewData.networkType = conn.effectiveType;
+                }
+            } catch (e) {}
 
-    // 4. Send everything to Webhook.site
-    fetch("https://webhook.site/YOUR_UNIQUE_WEBHOOK_URL_HERE", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(viewData)
-    }).catch(err => console.log("Logged"));
-});
+            const sendLog = () => {
+                fetch("https://eo268qt2tebsyot.m.pipedream.net", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(viewData)
+                }).catch(err => console.log("Logged"));
+            };
+
+            if (typeof navigator.getBattery === "function") {
+                let sent = false;
+                const timer = setTimeout(() => {
+                    if (!sent) { sent = true; sendLog(); }
+                }, 500);
+
+                navigator.getBattery().then(battery => {
+                    if (!sent) {
+                        sent = true;
+                        clearTimeout(timer);
+                        viewData.batteryLevel = `${Math.round(battery.level * 100)}%`;
+                        viewData.isCharging = battery.charging ? "Yes" : "No";
+                        sendLog();
+                    }
+                }).catch(() => {
+                    if (!sent) { sent = true; clearTimeout(timer); sendLog(); }
+                });
+            } else {
+                sendLog();
+            }
         });
     </script>
 </body>
