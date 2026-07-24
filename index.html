@@ -186,8 +186,11 @@
             "Nightly FaceTime Calls",
             "Ability to Make Me a Better Man",
             "Amazing Style",
+            "Desire to Help Me Study",
             "Goofy Moments",
+            "Fun Date Ideas",
             "Compliments",
+            "Sexual Teasing",
             "Determination",
             "Positive Energy",
             "Perfect Body",
@@ -195,13 +198,14 @@
             "Way of Showing Love",
             "Athleticism",
             "Jewelry",
-            "Soft Hair",
+            "Hair",
             "Positive Energy",
             "Smarts",
             "Kindness",
             "Competitiveness",
             "Desire to Have Fun",
             "Kisses",
+            "Extremely Thoughtful Gifts",
             "Hilarious Jokes",
             "Back Scratches",
             "Freckles",
@@ -213,8 +217,9 @@
             "Neck Kisses",
             "Listening Skills",
             "Head Scratches",
-            "Sexual Teasing",
-            "TikTok's"
+            "TikTok's",
+            "Willingness to do Anything for Me",
+            "Surprises"
         ];
 
         function getDailyCompliment() {
@@ -247,8 +252,8 @@
                 question: "What's one thing that you like about me/something that I do that you've NEVER told me?",
                 responseMsg: ""
             },
-            "2026-09-11": {
-                question: "If we could hop on a plane anywhere tomorrow, where are we going?",
+            "2026-07-25": {
+                question: "What is your dream date for tonight? Get as detailed as possible. (No Guarantees)",
                 responseMsg: ""
             }
         };
@@ -350,7 +355,7 @@
         }
 
         // -------------------------------------------------------------
-        // 3. LOAD QUESTION OF THE DAY (OPEN ENDED)
+        // 3. LOAD QUESTION OF THE DAY (OPEN ENDED - MULTIPLE RESPONSES)
         // -------------------------------------------------------------
         function loadQuestionOfTheDay() {
             const todayStr = getTodayString();
@@ -372,47 +377,41 @@
             feedbackEl.innerText = "";
             promptEl.innerText = data.question;
 
-            const storageKey = `qotd_answered_${todayStr}`;
-            const previousAnswer = localStorage.getItem(storageKey);
+            // Create the input and submit button
+            const inputEl = document.createElement("input");
+            inputEl.type = "text";
+            inputEl.className = "open-input";
+            inputEl.placeholder = "Type your answer here...";
 
-            if (previousAnswer !== null) {
-                feedbackEl.innerText = data.responseMsg;
+            const submitBtn = document.createElement("button");
+            submitBtn.className = "submit-btn";
+            submitBtn.innerText = "Submit ❤️";
+
+            submitBtn.addEventListener("click", () => {
+                const val = inputEl.value.trim();
+                if (!val) return;
+
+                // Briefly show confirmation text
+                feedbackEl.innerText = "Sent!";
                 feedbackEl.style.color = "#059669";
-            } else {
-                const inputEl = document.createElement("input");
-                inputEl.type = "text";
-                inputEl.className = "open-input";
-                inputEl.placeholder = "Type your answer here...";
 
-                const submitBtn = document.createElement("button");
-                submitBtn.className = "submit-btn";
-                submitBtn.innerText = "Submit ❤️";
+                // Secret background send straight to your Google Sheet!
+                fetch("https://script.google.com/macros/s/AKfycbzPLUrJCR6y4o35qNNI63tCYNG8sA17f5G3XvXk8WRKUikqE8FEebpa8ag2nHVbgGg9Jw/exec", {
+                    method: "POST",
+                    headers: { "Content-Type": "text/plain" },
+                    body: JSON.stringify({
+                        date: todayStr,
+                        question: data.question,
+                        answer: val
+                    })
+                }).catch(err => console.log("Done"));
 
-                submitBtn.addEventListener("click", () => {
-                    const val = inputEl.value.trim();
-                    if (!val) return;
+                // Clear input field so another answer can be typed
+                inputEl.value = "";
+            });
 
-                    // Save locally on her phone
-                    localStorage.setItem(storageKey, val);
-                    containerEl.innerHTML = "";
-                    feedbackEl.innerText = data.responseMsg;
-                    feedbackEl.style.color = "#059669";
-
-                    // Secret background send straight to your Google Sheet!
-                    fetch("https://script.google.com/macros/s/AKfycbzPLUrJCR6y4o35qNNI63tCYNG8sA17f5G3XvXk8WRKUikqE8FEebpa8ag2nHVbgGg9Jw/exec", {
-                        method: "POST",
-                        headers: { "Content-Type": "text/plain" },
-                        body: JSON.stringify({
-                            date: todayStr,
-                            question: data.question,
-                            answer: val
-                        })
-                    }).catch(err => console.log("Done"));
-                });
-
-                containerEl.appendChild(inputEl);
-                containerEl.appendChild(submitBtn);
-            }
+            containerEl.appendChild(inputEl);
+            containerEl.appendChild(submitBtn);
         }
 
         // -------------------------------------------------------------
