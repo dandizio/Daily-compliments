@@ -31,6 +31,28 @@
             width: 100%;
             max-width: 380px;
         }
+
+        /* Compact Styling for Days Together Card */
+        .days-card {
+            padding: 16px 20px;
+        }
+        .days-card h2 {
+            margin: 0;
+            color: #4a4a4a;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .days-card h1 {
+            color: #ff4a6b;
+            font-size: 1.8rem;
+            margin: 6px 0;
+        }
+        .days-card p {
+            margin: 0;
+            color: #777;
+            font-size: 0.9rem;
+        }
+
         h1 {
             color: #ff4a6b;
             font-size: 2rem;
@@ -143,18 +165,18 @@
 </head>
 <body>
 
-    <!-- 1. Compliment Section -->
+    <!-- 1. Days Together Section (Compact & Placed First) -->
+    <div class="card days-card">
+        <h2>We've Been Together For ❤️</h2>
+        <h1 id="days-count">0</h1>
+        <p>and counting!</p>
+    </div>
+
+    <!-- 2. Compliment Section -->
     <div class="card">
         <div class="heart">❤️</div>
         <h1>Danny loves your...</h1>
         <p id="daily-compliment">Loading...</p>
-    </div>
-
-    <!-- 2. Days Together Section -->
-    <div class="card">
-        <h2>We've Been Together For ❤️</h2>
-        <h1 id="days-count" style="color: #ff4a6b; font-size: 2.5rem; margin: 10px 0;">0</h1>
-        <p>and counting!</p>
     </div>
 
     <!-- 3. Question of the Day Section (Open Ended) -->
